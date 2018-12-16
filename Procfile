@@ -1,1 +1,1 @@
-web: gunicorn kcplotly:app
+web:gunicorn app:app
