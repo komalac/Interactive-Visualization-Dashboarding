@@ -4,64 +4,109 @@ function buildMetadata(sample_metadata) {
   var ddiv = d3.select("#sample-metadata");
   ddiv.html("");
   
-  
-
   d3.json(url).then(function(response) {
-    var pdata = document.createElement("p");
-    console.log(response);    
-    // response.key[0]
-    // var row = document.createElement("p");
-    Object.entries(response).forEach(([key, value]) => {
-      
-      // dkey = response.dataset.AGE
-      // dval =  unpack(response.dataset.data, 1);
-
-      // console.log(dkey)
-      // console.log(dval)
-        var cell = ddiv.append("p");
-        var dvalue = key +": " + value
-        cell.text(dvalue);
-        
-        // ddiv.append("p")
-        // .text(function(d){return d.key}) + ": " + text(function(d){return d.value})
-    // });
+  var pdata = document.createElement("h6");
+  
+  
+  Object.entries(response).forEach(([key, value]) => {
+          
+      var cell = ddiv.append("h6");
+      var dvalue = key +": " + value
+      cell.text(dvalue);
+    
+    })
+    
+    buildGauge(response['WFREQ'])
   })
-})
+
+  
+  
+ 
 };
-  //
-    
-    
+ 
+function buildGauge(gdata){
 
-    
+    var level = parseFloat(gdata) * 20;
 
+        var data = [{ type: 'scatter',
+        x: [0], y:[0],
+        marker: {size: 24, color:'850000'},
+        showlegend: false,
+        name: 'speed',
+        text: level,
+        hoverinfo: 'text+name'},
+        { values: [50/9,50/9,50/9,50/9,50/9,50/9,50/9,50/9,50/9,50],
+        rotation: 90,
+        
+        text: ['8-9','7-8','6-7','5-6','4-5','3-4','2-3','1-2','0-1',''],
+        textinfo: 'text',
+        textposition:'inside',
+        hole: .5,
+        type: 'pie',
+        showlegend: false,
+        marker: {
+              colors:['rgba(14, 127, 0, .5)', 'rgba(110, 154, 22, .5)',
+                                  'rgba(130, 182, 42, .5)', 'rgba(142, 200, 95, .5)',
+                                  'rgba(155, 216, 135, .5)', 'rgba(165, 226, 202, .5)',
+                                  'rgba(175, 235, 215, .5)','rgba(190, 245, 225, .5)','rgba(220, 250, 235,.5)','rgba(255, 255, 255, 0)']},
+              labels: ['8-9','7-8','6-7','5-6','4-5','3-4','2-3','1-2','0-1',''],
+              hoverinfo: 'label'       
+        }];
 
-  // Use `d3.json` to fetch the metadata for a sample
-    // Use d3 to select the panel with id of `#sample-metadata`
+        // Trig to calc meter point
+        var degrees = 180-level,
+        radius = .5;
+        var radians = degrees * Math.PI / 180;
+        var x = radius * Math.cos(radians);
+        var y = radius * Math.sin(radians);
 
-    // Use `.html("") to clear any existing metadata
+        // Path: may have to change to create a better triangle
+        var mainPath = 'M -.0 -0.025 L .0 0.025 L ',
+        pathX = String(x),
+        space = ' ',
+        pathY = String(y),
+        pathEnd = ' Z';
+        var path = mainPath.concat(pathX,space,pathY,pathEnd);
 
-    // Use `Object.entries` to add each key and value pair to the panel
-    // Hint: Inside the loop, you will need to use d3 to append new
-    // tags for each key-value in the metadata.
+        var layout = {
+        shapes:[{
+        type: 'path',
+        path: path,
+        fillcolor: '850000',
+        line: {
+          color: '850000'
+        }
+        }],
+        // title: 'Gauge',
+        Speed : '0-100',
+        height: 500,
+        width: 600,
+        xaxis: {zeroline:false, showticklabels:false,
+                showgrid: false, range: [-1, 1]},
+        yaxis: {zeroline:false, showticklabels:false,
+                showgrid: false, range: [-1, 1]}
+        };
 
-    // BONUS: Build the Gauge Chart
-    // buildGauge(data.WFREQ);
+            Plotly.newPlot('gauge', data, layout)
 
+  }
+  
 
 function buildCharts(sample) {
 
+  
   // @TODO: Build a Pie Chart
   var url = "/samples/" + sample;
   d3.json(url).then(function(response) {
-        
-    var data = [{
+    
+      var data = [{
       values: response.sample_values.slice(0,10),
       labels: response.otu_ids.slice(0,10),
       type: 'pie'
     }];
 
     var layout = {
-      title: "Samples "+sample,
+      // title: "Samples "+sample,
       xaxis: {
         title: "Samples"
       },
@@ -92,7 +137,7 @@ function buildCharts(sample) {
     }];
 
     var layout = {
-      title: "Samples "+sample,
+      // title: "Samples "+sample,
       xaxis: {
         title: "OTU ID"
       },
@@ -106,7 +151,7 @@ function buildCharts(sample) {
   
     // HINT: You will need to use slice() to grab the top 10 sample_values,
     // otu_ids, and labels (10 each).
-
+  
 
 }
     
